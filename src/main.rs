@@ -7,6 +7,7 @@ use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use bevy::DefaultPlugins;
 use bevy_game::GamePlugin; // ToDo: Replace bevy_game with your new crate name.
+use bevy_xpbd_2d::prelude::*;
 use std::io::Cursor;
 use winit::window::Icon;
 
@@ -14,20 +15,30 @@ fn main() {
     App::new()
         .insert_resource(Msaa::Off)
         .insert_resource(AssetMetaCheck::Never)
-        .insert_resource(ClearColor(Color::rgb(0.4, 0.4, 0.4)))
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Bevy game".to_string(), // ToDo
-                // Bind to canvas included in `index.html`
-                canvas: Some("#bevy".to_owned()),
-                // Tells wasm not to override default event handling, like F5 and Ctrl+R
-                prevent_default_event_handling: false,
-                ..default()
-            }),
-            ..default()
-        }))
-        .add_plugins(GamePlugin)
+        .insert_resource(ClearColor(
+            Color::hex("FFFBE8").expect("Background Color parsing failed"),
+        ))
         .add_systems(Startup, set_window_icon)
+        .add_plugins(PhysicsPlugins::default())
+        .add_plugins(PhysicsDebugPlugin::default())
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "Bevy game".to_string(), // ToDo
+                        // Bind to canvas included in `index.html`
+                        canvas: Some("#bevy".to_owned()),
+                        // Tells wasm not to override default event handling, like F5 and Ctrl+R
+                        prevent_default_event_handling: false,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .set(ImagePlugin::default_nearest()),
+        )
+        .add_plugins(GamePlugin)
+        .add_plugins(bevy_inspector_egui::quick::WorldInspectorPlugin::new())
+        // .insert_resource(Gravity(Vec2::NEG_Y * 100.0))
         .run();
 }
 
