@@ -8,9 +8,9 @@ use bevy::winit::WinitWindows;
 use bevy::DefaultPlugins;
 use bevy_game::GamePlugin; // ToDo: Replace bevy_game with your new crate name.
 use bevy_xpbd_2d::prelude::*;
+
 use std::io::Cursor;
 use winit::window::Icon;
-
 fn main() {
     App::new()
         .insert_resource(Msaa::Off)
