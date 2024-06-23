@@ -1,30 +1,31 @@
+use bevy::prelude::*;
 use bevy::{
     app::{Plugin, Startup},
     asset::AssetServer,
     math::Vec2,
-    prelude::{Component, Res, *},
-    render::camera,
+    prelude::{Component, Res},
     sprite::{Sprite, SpriteBundle},
 };
+use bevy_inspector_egui::prelude::*;
 use bevy_xpbd_2d::{
-    components::{GravityScale, MassPropertiesBundle, RigidBody},
+    components::{GravityScale, RigidBody},
     prelude::Collider,
     prelude::*,
 };
 
-use crate::{chunk::spawn_chunk, System};
-
 const HITBOX: (f32, f32) = (40., 40.);
 
-#[derive(Component)]
+#[derive(Component, Reflect, InspectorOptions)]
 pub struct Player {
     on_ground: bool,
+    #[inspector(min = 0.0, max = 100.0)]
     gas: f32,
 }
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
+        app.register_type::<Player>();
         app.add_systems(Startup, setup)
             .add_systems(Update, (movement, physic, hit, camera_movement));
     }
@@ -124,14 +125,20 @@ fn hit(mut q: Query<(&mut Player, &ShapeHits)>) {
 }
 
 fn camera_movement(
-    mut q: Query<(&Player, &Transform)>,
-    mut camera: Query<(&Camera, &mut GlobalTransform), With<Camera2d>>,
+    player_q: Query<&Transform, With<Player>>,
+    mut camera_q: Query<&mut Transform, (With<Camera2d>, Without<Player>)>,
+    time: Res<Time>,
 ) {
-    if let Ok((player, mut player_transform)) = q.get_single() {
-        log::info!("player_transform: {:?}", player_transform);
-        if let Ok((camera, mut camera_transform)) = camera.get_single_mut() {
-            camera_transform.translation().x = player_transform.translation.x;
-            camera_transform.translation().y = player_transform.translation.y;
+    if let Ok(player_transform) = player_q.get_single() {
+        if let Ok(mut camera_transform) = camera_q.get_single_mut() {
+            camera_transform.translation.x +=
+                (player_transform.translation.x - camera_transform.translation.x) / 20.
+                    * time.delta_seconds()
+                    * 100.;
+            camera_transform.translation.y +=
+                (player_transform.translation.y - camera_transform.translation.y) / 20.
+                    * time.delta_seconds()
+                    * 100.;
         }
     } else {
         return;
