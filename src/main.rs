@@ -16,7 +16,7 @@ fn main() {
         .insert_resource(Msaa::Off)
         .insert_resource(AssetMetaCheck::Never)
         .insert_resource(ClearColor(
-            Color::hex("FFFBE8").expect("Background Color parsing failed"),
+            Color::hex("0A093C").expect("Background Color parsing failed"),
         ))
         .add_systems(Startup, set_window_icon)
         .add_plugins(PhysicsPlugins::default())

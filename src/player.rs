@@ -68,11 +68,11 @@ fn movement(
         log::info!("val-y: {:?}", val.y);
 
         if key.pressed(KeyCode::ArrowLeft) || key.pressed(KeyCode::KeyA) {
-            transform.translation.x -= 2. * time.delta_seconds() * 100.;
+            val.x -= 5. * time.delta_seconds() * 100.;
         }
 
         if key.pressed(KeyCode::ArrowRight) || key.pressed(KeyCode::KeyD) {
-            transform.translation.x += 2. * time.delta_seconds() * 100.;
+            val.x += 5. * time.delta_seconds() * 100.;
         }
 
         if key.pressed(KeyCode::ArrowUp) || key.pressed(KeyCode::KeyW) {
@@ -100,12 +100,12 @@ fn physic(mut q: Query<(&Player, &mut Transform, &mut LinearVelocity)>) {
         if physic.y <= -400. {
             physic.y = -400.;
         }
-        if physic.x <= -5. {
-            physic.x = -5.;
-        }
-        if physic.x >= 5. {
-            physic.x = 5.;
-        }
+        // if physic.x <= -5. {
+        //     physic.x = -5.;
+        // }
+        // if physic.x >= 5. {
+        //     physic.x = 5.;
+        // }
     } else {
         return;
     }

@@ -1,7 +1,10 @@
 use std::sync::Mutex;
 
 use bevy::prelude::*;
-use bevy_xpbd_2d::{components::RigidBody, prelude::Collider};
+use bevy_xpbd_2d::{
+    components::{AngularDamping, LinearDamping, RigidBody},
+    prelude::Collider,
+};
 use lazy_static::lazy_static;
 use noise::{NoiseFn, Perlin, Seedable};
 
@@ -49,6 +52,8 @@ pub fn spawn_chunk(mut gizmos: Gizmos, mut commands: Commands, asset_server: Res
                                 if val >= 0.2 {
                                     par.spawn((
                                         Name::new("Block"),
+                                        LinearDamping(30.8),
+                                        AngularDamping(10.6),
                                         RigidBody::Static,
                                         Collider::rectangle(BLOCK_SIZE, BLOCK_SIZE),
                                         SpriteBundle {
@@ -56,7 +61,7 @@ pub fn spawn_chunk(mut gizmos: Gizmos, mut commands: Commands, asset_server: Res
                                                 custom_size: Some(Vec2::new(
                                                     BLOCK_SIZE, BLOCK_SIZE,
                                                 )),
-                                                color: Color::hex("#8B4513").unwrap(),
+                                                color: Color::hex("#14368C").unwrap(),
                                                 ..Default::default()
                                             },
                                             transform: Transform::from_translation(Vec3::new(
