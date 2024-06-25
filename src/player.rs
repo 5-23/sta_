@@ -65,9 +65,6 @@ fn movement(
     time: Res<Time>,
 ) {
     if let Ok((mut player, mut transform, mut val)) = q.get_single_mut() {
-        transform.rotation = Quat::from_axis_angle(Vec3::Z, 0.);
-        log::info!("val-y: {:?}", val.y);
-
         if key.pressed(KeyCode::ArrowLeft) || key.pressed(KeyCode::KeyA) {
             val.x -= 5. * time.delta_seconds() * 100.;
         }

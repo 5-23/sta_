@@ -20,7 +20,7 @@ fn main() {
         ))
         .add_systems(Startup, set_window_icon)
         .add_plugins(PhysicsPlugins::default())
-        .add_plugins(PhysicsDebugPlugin::default())
+        // .add_plugins(PhysicsDebugPlugin::default())
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Bevy game".to_string(), // ToDo
