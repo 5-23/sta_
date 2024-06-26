@@ -18,7 +18,6 @@ const HITBOX: (f32, f32) = (40., 40.);
 #[derive(Component, Reflect, InspectorOptions)]
 pub struct Player {
     on_ground: bool,
-    #[inspector(min = 0.0, max = 100.0)]
     gas: f32,
 }
 pub struct PlayerPlugin;

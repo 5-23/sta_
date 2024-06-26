@@ -54,13 +54,13 @@ pub fn spawn_chunk(_gizmos: Gizmos, mut commands: Commands, _asset_server: Res<A
 
 pub fn debug_chunk(
     mut gizmos: Gizmos,
-    mut chunk_query: Query<(Entity, &Children, &Chunk), With<Chunk>>,
+    mut chunk_query: Query<(Entity, &Children, &Chunk)>,
     mut commands: Commands,
 ) {
     for (entity, child, chunk) in chunk_query.iter_mut() {
         let entity = commands.get_entity(entity);
         if entity.is_none() {
-            continue;
+            return;
         }
         let mut entity = entity.unwrap();
         if child.len() == 0 {
@@ -110,13 +110,13 @@ pub fn render_chunk(
     for (entity, child, chunk) in chunk_query.iter_mut() {
         let player_tile_x = player.translation.x / (CHUNK_SIZE * BLOCK_SIZE);
         let player_tile_y = player.translation.y / (CHUNK_SIZE * BLOCK_SIZE);
-        log::info!("{}", chunk.x - player_tile_x);
         if (chunk.x - player_tile_x) <= -3.
             || (chunk.x - player_tile_x) >= 3.
             || (chunk.y - player_tile_y) <= -3.
             || (chunk.y - player_tile_y) >= 3.
         {
-            commands.get_entity(entity).unwrap().despawn()
+            let mut e = commands.get_entity(entity).unwrap();
+            e.despawn_descendants();
         } else {
             gizmos.rect_2d(
                 Vec2::new(
