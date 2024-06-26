@@ -62,41 +62,6 @@ pub fn debug_chunk(
         if entity.is_none() {
             return;
         }
-        let mut entity = entity.unwrap();
-        if child.len() == 0 {
-            let perlin = Perlin::new(SEED.clone());
-
-            entity.with_children(|par| {
-                for i in 0..(CHUNK_SIZE as isize) {
-                    for j in 0..(CHUNK_SIZE as isize) {
-                        let val = perlin.get([
-                            (chunk.x * CHUNK_SIZE + i as f32) as f64 / NOISE_SCALE,
-                            (chunk.y * CHUNK_SIZE + j as f32) as f64 / NOISE_SCALE,
-                        ]);
-                        if val >= 0.2 {
-                            par.spawn((
-                                Name::new("Block"),
-                                RigidBody::Static,
-                                Collider::rectangle(BLOCK_SIZE, BLOCK_SIZE),
-                                SpriteBundle {
-                                    sprite: Sprite {
-                                        custom_size: Some(Vec2::new(BLOCK_SIZE, BLOCK_SIZE)),
-                                        color: Color::hex("14368C").unwrap_or(Color::RED),
-                                        ..Default::default()
-                                    },
-                                    transform: Transform::from_translation(Vec3::new(
-                                        i as f32 * BLOCK_SIZE - 140.,
-                                        j as f32 * BLOCK_SIZE - 140.,
-                                        0.,
-                                    )),
-                                    ..Default::default()
-                                },
-                            ));
-                        }
-                    }
-                }
-            });
-        }
     }
 }
 
@@ -108,16 +73,125 @@ pub fn render_chunk(
 ) {
     let mut player = player.get_single_mut().unwrap();
     for (entity, child, chunk) in chunk_query.iter_mut() {
-        let player_tile_x = player.translation.x / (CHUNK_SIZE * BLOCK_SIZE);
-        let player_tile_y = player.translation.y / (CHUNK_SIZE * BLOCK_SIZE);
-        if (chunk.x - player_tile_x) <= -3.
-            || (chunk.x - player_tile_x) >= 3.
-            || (chunk.y - player_tile_y) <= -3.
-            || (chunk.y - player_tile_y) >= 3.
-        {
-            let mut e = commands.get_entity(entity).unwrap();
+        let cx = chunk.x - player.translation.x / (CHUNK_SIZE * BLOCK_SIZE);
+        let cy = chunk.y - player.translation.y / (CHUNK_SIZE * BLOCK_SIZE);
+        let mut e = commands.get_entity(entity).unwrap();
+        if cx < -3. || cx > 3. || cy < -3. || cy > 4. {
             e.despawn_descendants();
+            e.despawn();
+            e.despawn_recursive();
+
+            if cx <= -3. {
+                commands
+                    .spawn((
+                        Name::new("Chunk"),
+                        Chunk {
+                            x: chunk.x + 5.,
+                            y: chunk.y,
+                        },
+                        SpriteBundle {
+                            transform: Transform::from_translation(Vec3::new(
+                                (chunk.x + 5.) * CHUNK_SIZE * BLOCK_SIZE,
+                                chunk.y * CHUNK_SIZE * BLOCK_SIZE,
+                                0.,
+                            )),
+                            ..Default::default()
+                        },
+                    ))
+                    .with_children(|_| {});
+            }
+            if cx >= 3. {
+                commands
+                    .spawn((
+                        Name::new("Chunk"),
+                        Chunk {
+                            x: chunk.x - 6.,
+                            y: chunk.y,
+                        },
+                        SpriteBundle {
+                            transform: Transform::from_translation(Vec3::new(
+                                (chunk.x - 6.) * CHUNK_SIZE * BLOCK_SIZE,
+                                chunk.y * CHUNK_SIZE * BLOCK_SIZE,
+                                0.,
+                            )),
+                            ..Default::default()
+                        },
+                    ))
+                    .with_children(|_| {});
+            }
+            if cy <= -3. {
+                commands
+                    .spawn((
+                        Name::new("Chunk"),
+                        Chunk {
+                            x: chunk.x,
+                            y: chunk.y + 5.,
+                        },
+                        SpriteBundle {
+                            transform: Transform::from_translation(Vec3::new(
+                                chunk.x * CHUNK_SIZE * BLOCK_SIZE,
+                                (chunk.y + 5.) * CHUNK_SIZE * BLOCK_SIZE,
+                                0.,
+                            )),
+                            ..Default::default()
+                        },
+                    ))
+                    .with_children(|_| {});
+            }
+            if cy >= 3. {
+                commands
+                    .spawn((
+                        Name::new("Chunk"),
+                        Chunk {
+                            x: chunk.x,
+                            y: chunk.y - 6.,
+                        },
+                        SpriteBundle {
+                            transform: Transform::from_translation(Vec3::new(
+                                chunk.x * CHUNK_SIZE * BLOCK_SIZE,
+                                (chunk.y - 6.) * CHUNK_SIZE * BLOCK_SIZE,
+                                0.,
+                            )),
+                            ..Default::default()
+                        },
+                    ))
+                    .with_children(|_| {});
+            }
         } else {
+            if child.len() == 0 {
+                let perlin = Perlin::new(SEED.clone());
+
+                e.with_children(|par| {
+                    for i in 0..(CHUNK_SIZE as isize) {
+                        for j in 0..(CHUNK_SIZE as isize) {
+                            let val = perlin.get([
+                                (chunk.x * CHUNK_SIZE + i as f32) as f64 / NOISE_SCALE,
+                                (chunk.y * CHUNK_SIZE + j as f32) as f64 / NOISE_SCALE,
+                            ]);
+                            if val >= 0.2 {
+                                par.spawn((
+                                    Name::new("Block"),
+                                    RigidBody::Static,
+                                    Collider::rectangle(BLOCK_SIZE, BLOCK_SIZE),
+                                    SpriteBundle {
+                                        sprite: Sprite {
+                                            custom_size: Some(Vec2::new(BLOCK_SIZE, BLOCK_SIZE)),
+                                            color: Color::hex("14368C").unwrap_or(Color::RED),
+                                            ..Default::default()
+                                        },
+                                        transform: Transform::from_translation(Vec3::new(
+                                            i as f32 * BLOCK_SIZE - 140.,
+                                            j as f32 * BLOCK_SIZE - 140.,
+                                            0.,
+                                        )),
+                                        ..Default::default()
+                                    },
+                                ));
+                            }
+                        }
+                    }
+                });
+            }
             gizmos.rect_2d(
                 Vec2::new(
                     chunk.x * CHUNK_SIZE * BLOCK_SIZE,
