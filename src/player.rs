@@ -1,3 +1,7 @@
+use avian2d::collision::Collider;
+use avian2d::parry::math::Rotation;
+use avian2d::prelude::{GravityScale, LinearVelocity, RigidBody};
+use avian2d::spatial_query::{ShapeCaster, ShapeHits};
 use bevy::prelude::*;
 use bevy::{
     app::{Plugin, Startup},
@@ -7,11 +11,6 @@ use bevy::{
     sprite::{Sprite, SpriteBundle},
 };
 use bevy_inspector_egui::prelude::*;
-use bevy_xpbd_2d::{
-    components::{GravityScale, RigidBody},
-    prelude::Collider,
-    prelude::*,
-};
 
 const HITBOX: (f32, f32) = (40., 40.);
 
@@ -39,14 +38,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         RigidBody::Dynamic,
         GravityScale(40.),
-        Rotation::from_degrees(90.0),
+        // Rotation::new(90.0),
         Collider::rectangle(HITBOX.0, HITBOX.1),
-        ShapeCaster::new(
-            Collider::rectangle(HITBOX.0, HITBOX.1),
-            Vec2::ZERO,
-            0.0,
-            Direction2d::X,
-        ),
         SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::new(HITBOX.0, HITBOX.1)),
@@ -63,7 +56,7 @@ fn movement(
     key: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
 ) {
-    if let Ok((mut player, mut transform, mut val)) = q.get_single_mut() {
+    if let Ok((mut player, _transform, mut val)) = q.get_single_mut() {
         if key.pressed(KeyCode::ArrowLeft) || key.pressed(KeyCode::KeyA) {
             val.x -= 5. * time.delta_seconds() * 100.;
         }

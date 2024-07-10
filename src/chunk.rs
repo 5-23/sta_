@@ -1,5 +1,5 @@
-use bevy::prelude::*;
-use bevy_xpbd_2d::{components::RigidBody, prelude::Collider};
+use avian2d::{collision::Collider, prelude::RigidBody};
+use bevy::{color::palettes::tailwind, prelude::*};
 use lazy_static::lazy_static;
 use noise::{NoiseFn, Perlin};
 
@@ -13,6 +13,9 @@ lazy_static! {
     static ref SEED: u32 = rand::random::<u32>();
 }
 #[derive(Component)]
+struct NoneEntity;
+
+#[derive(Component)]
 pub struct Chunk {
     x: f32,
     y: f32,
@@ -24,7 +27,7 @@ impl Plugin for ChunkPlugin {
         app.add_systems(Startup, spawn_chunk);
         // app.add_systems(Startup, spawn_block);
         app.add_systems(Update, render_chunk);
-        app.add_systems(Update, debug_chunk);
+        // app.add_systems(Update, debug_chunk);
     }
 }
 
@@ -47,23 +50,25 @@ pub fn spawn_chunk(_gizmos: Gizmos, mut commands: Commands, _asset_server: Res<A
                         ..Default::default()
                     },
                 ))
-                .with_children(|_| {});
+                .with_children(|p| {
+                    p.spawn(NoneEntity);
+                });
         }
     }
 }
 
-pub fn debug_chunk(
-    mut gizmos: Gizmos,
-    mut chunk_query: Query<(Entity, &Children, &Chunk)>,
-    mut commands: Commands,
-) {
-    for (entity, child, chunk) in chunk_query.iter_mut() {
-        let entity = commands.get_entity(entity);
-        if entity.is_none() {
-            return;
-        }
-    }
-}
+// pub fn debug_chunk(
+//     gizmos: Gizmos,
+//     mut chunk_query: Query<(Entity, &Children, &Chunk)>,
+//     mut commands: Commands,
+// ) {
+//     for (entity, child, chunk) in chunk_query.iter_mut() {
+//         let entity = commands.get_entity(entity);
+//         if entity.is_none() {
+//             return;
+//         }
+//     }
+// }
 
 pub fn render_chunk(
     mut gizmos: Gizmos,
@@ -71,17 +76,18 @@ pub fn render_chunk(
     mut player: Query<&Transform, (With<Player>, Without<Chunk>)>,
     mut commands: Commands,
 ) {
-    let mut player = player.get_single_mut().unwrap();
+    let player = player.get_single_mut().unwrap();
+    log::info!("chunk: {:?}", chunk_query.iter().len());
     for (entity, child, chunk) in chunk_query.iter_mut() {
         let cx = chunk.x - player.translation.x / (CHUNK_SIZE * BLOCK_SIZE);
         let cy = chunk.y - player.translation.y / (CHUNK_SIZE * BLOCK_SIZE);
+        let n = 3.;
         let mut e = commands.get_entity(entity).unwrap();
-        if cx < -3. || cx > 3. || cy < -3. || cy > 4. {
+        if cx < -n || cx >= n || cy < -n || cy >= n {
             e.despawn_descendants();
             e.despawn();
-            e.despawn_recursive();
 
-            if cx <= -3. {
+            if cx < -n {
                 commands
                     .spawn((
                         Name::new("Chunk"),
@@ -98,28 +104,32 @@ pub fn render_chunk(
                             ..Default::default()
                         },
                     ))
-                    .with_children(|_| {});
+                    .with_children(|p| {
+                        p.spawn(NoneEntity);
+                    });
             }
-            if cx >= 3. {
+            if cx >= n {
                 commands
                     .spawn((
                         Name::new("Chunk"),
                         Chunk {
-                            x: chunk.x - 6.,
+                            x: chunk.x - 5.,
                             y: chunk.y,
                         },
                         SpriteBundle {
                             transform: Transform::from_translation(Vec3::new(
-                                (chunk.x - 6.) * CHUNK_SIZE * BLOCK_SIZE,
+                                (chunk.x - 5.) * CHUNK_SIZE * BLOCK_SIZE,
                                 chunk.y * CHUNK_SIZE * BLOCK_SIZE,
                                 0.,
                             )),
                             ..Default::default()
                         },
                     ))
-                    .with_children(|_| {});
+                    .with_children(|p| {
+                        p.spawn(NoneEntity);
+                    });
             }
-            if cy <= -3. {
+            if cy < -n {
                 commands
                     .spawn((
                         Name::new("Chunk"),
@@ -136,29 +146,33 @@ pub fn render_chunk(
                             ..Default::default()
                         },
                     ))
-                    .with_children(|_| {});
+                    .with_children(|p| {
+                        p.spawn(NoneEntity);
+                    });
             }
-            if cy >= 3. {
+            if cy >= n {
                 commands
                     .spawn((
                         Name::new("Chunk"),
                         Chunk {
                             x: chunk.x,
-                            y: chunk.y - 6.,
+                            y: chunk.y - 5.,
                         },
                         SpriteBundle {
                             transform: Transform::from_translation(Vec3::new(
                                 chunk.x * CHUNK_SIZE * BLOCK_SIZE,
-                                (chunk.y - 6.) * CHUNK_SIZE * BLOCK_SIZE,
+                                (chunk.y - 5.) * CHUNK_SIZE * BLOCK_SIZE,
                                 0.,
                             )),
                             ..Default::default()
                         },
                     ))
-                    .with_children(|_| {});
+                    .with_children(|p| {
+                        p.spawn(NoneEntity);
+                    });
             }
         } else {
-            if child.len() == 0 {
+            if child.len() == 1 {
                 let perlin = Perlin::new(SEED.clone());
 
                 e.with_children(|par| {
@@ -176,7 +190,9 @@ pub fn render_chunk(
                                     SpriteBundle {
                                         sprite: Sprite {
                                             custom_size: Some(Vec2::new(BLOCK_SIZE, BLOCK_SIZE)),
-                                            color: Color::hex("14368C").unwrap_or(Color::RED),
+                                            color: Srgba::hex("14368C")
+                                                .unwrap_or(Srgba::RED)
+                                                .into(),
                                             ..Default::default()
                                         },
                                         transform: Transform::from_translation(Vec3::new(
@@ -192,6 +208,7 @@ pub fn render_chunk(
                     }
                 });
             }
+
             gizmos.rect_2d(
                 Vec2::new(
                     chunk.x * CHUNK_SIZE * BLOCK_SIZE,
@@ -199,7 +216,7 @@ pub fn render_chunk(
                 ),
                 0.,
                 Vec2::new(CHUNK_SIZE * BLOCK_SIZE, CHUNK_SIZE * BLOCK_SIZE),
-                Color::GREEN,
+                tailwind::GREEN_400,
             );
         }
     }
