@@ -1,0 +1,18 @@
+{
+    "manipulators": [
+        {
+            "type": "basic",
+            "from": {
+                "key_code": "up_arrow"
+            },
+            "to": [
+                {
+                    "mouse_key": {
+                        "x": 10,
+                        "y": 11
+                    }
+                }
+            ]
+        }
+    ]
+}

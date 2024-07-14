@@ -1,6 +1,9 @@
 use avian2d::collision::Collider;
 use avian2d::parry::math::Rotation;
-use avian2d::prelude::{GravityScale, LinearVelocity, RigidBody};
+use avian2d::prelude::{
+    CoefficientCombine, GravityScale, LinearVelocity, Restitution, RigidBody, SpeculativeMargin,
+    SweptCcd,
+};
 use avian2d::spatial_query::{ShapeCaster, ShapeHits};
 use bevy::prelude::*;
 use bevy::{
@@ -37,6 +40,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             gas: 100.,
         },
         RigidBody::Dynamic,
+        Restitution::new(0.4).with_combine_rule(CoefficientCombine::Multiply),
+        SpeculativeMargin(2.),
+        SweptCcd::default(),
         GravityScale(40.),
         // Rotation::new(90.0),
         Collider::rectangle(HITBOX.0, HITBOX.1),
@@ -87,9 +93,9 @@ fn physic(mut q: Query<(&Player, &mut Transform, &mut LinearVelocity)>) {
         if physic.y >= 200. {
             physic.y = 200.;
         }
-        if physic.y <= -400. {
-            physic.y = -400.;
-        }
+        // if physic.y <= -400. {
+        //     physic.y = -400.;
+        // }
         // if physic.x <= -5. {
         //     physic.x = -5.;
         // }

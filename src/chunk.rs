@@ -1,4 +1,7 @@
-use avian2d::{collision::Collider, prelude::RigidBody};
+use avian2d::{
+    collision::Collider,
+    prelude::{CoefficientCombine, Restitution, RigidBody, SpeculativeMargin},
+};
 use bevy::{color::palettes::tailwind, prelude::*};
 use lazy_static::lazy_static;
 use noise::{NoiseFn, Perlin};
@@ -186,6 +189,8 @@ pub fn render_chunk(
                                 par.spawn((
                                     Name::new("Block"),
                                     RigidBody::Static,
+                                    Restitution::new(0.4)
+                                        .with_combine_rule(CoefficientCombine::Multiply),
                                     Collider::rectangle(BLOCK_SIZE, BLOCK_SIZE),
                                     SpriteBundle {
                                         sprite: Sprite {
