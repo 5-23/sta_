@@ -48,32 +48,7 @@ dev = [
 #   and android_shared_stdcxx, since that is covered in `mobile`
 [dependencies]
 
-bevy = { version = "0.14", default-features = false, features = [
-    "animation",
-    "bevy_asset",
-    "bevy_state",
-    "bevy_color",
-    "bevy_gilrs",
-    "bevy_scene",
-    "bevy_winit",
-    "bevy_core_pipeline",
-    "bevy_pbr",
-    "bevy_gltf",
-    "bevy_render",
-    "bevy_sprite",
-    "bevy_text",
-    "bevy_ui",
-    "multi_threaded",
-    "png",
-    "hdr",
-    "x11",
-    "bevy_gizmos",
-    "tonemapping_luts",
-    "smaa_luts",
-    "default_font",
-    "webgl2",
-    "sysinfo_plugin",
-] }
+bevy = { version = "0.14", default-features = false, features = ["animation", "bevy_asset", "bevy_state", "bevy_color", "bevy_gilrs", "bevy_scene", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_gltf", "bevy_render", "bevy_sprite", "bevy_text", "bevy_ui", "multi_threaded", "png", "hdr", "x11", "bevy_gizmos", "tonemapping_luts", "smaa_luts", "default_font", "webgl2", "sysinfo_plugin", "mp3"] }
 bevy_kira_audio = { version = "0.20" }
 bevy_asset_loader = { version = "0.21" }
 rand = { version = "0.8.3" }
@@ -89,6 +64,9 @@ log = "0.4.21"
 noise = "0.9.0"
 lazy_static = "1.4.0"
 avian2d = "0.1.0"
+bevy_light_2d = "0.2.0"
 
 [build-dependencies]
 embed-resource = "1"
+
+# bg.mp3: https://www.youtube.com/watch?v=YQyvf5mSnHc

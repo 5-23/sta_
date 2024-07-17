@@ -3,6 +3,7 @@ use avian2d::{
     prelude::{CoefficientCombine, Restitution, RigidBody, SpeculativeMargin},
 };
 use bevy::{color::palettes::tailwind, prelude::*};
+use bevy_light_2d::light::{PointLight2d, PointLight2dBundle};
 use lazy_static::lazy_static;
 use noise::{NoiseFn, Perlin};
 
@@ -80,7 +81,7 @@ pub fn render_chunk(
     mut commands: Commands,
 ) {
     let player = player.get_single_mut().unwrap();
-    log::info!("chunk: {:?}", chunk_query.iter().len());
+    // log::info!("chunk: {:?}", chunk_query.iter().len());
     for (entity, child, chunk) in chunk_query.iter_mut() {
         let cx = chunk.x - player.translation.x / (CHUNK_SIZE * BLOCK_SIZE);
         let cy = chunk.y - player.translation.y / (CHUNK_SIZE * BLOCK_SIZE);
@@ -181,11 +182,51 @@ pub fn render_chunk(
                 e.with_children(|par| {
                     for i in 0..(CHUNK_SIZE as isize) {
                         for j in 0..(CHUNK_SIZE as isize) {
-                            let val = perlin.get([
+                            let val_block = perlin.get([
                                 (chunk.x * CHUNK_SIZE + i as f32) as f64 / NOISE_SCALE,
                                 (chunk.y * CHUNK_SIZE + j as f32) as f64 / NOISE_SCALE,
                             ]);
-                            if val >= 0.2 {
+
+                            let val_ore = perlin.get([
+                                (chunk.x * CHUNK_SIZE + i as f32) as f64 / 1.2,
+                                (chunk.y * CHUNK_SIZE + j as f32) as f64 / 1.2,
+                            ]);
+                            if val_ore >= 0.7 && 0.11 > val_block && val_block >= 0.1 {
+                                par.spawn((
+                                    Name::new("Ore"),
+                                    RigidBody::Static,
+                                    Restitution::new(0.4)
+                                        .with_combine_rule(CoefficientCombine::Multiply),
+                                    Collider::rectangle(BLOCK_SIZE, BLOCK_SIZE),
+                                    SpriteBundle {
+                                        sprite: Sprite {
+                                            custom_size: Some(Vec2::new(BLOCK_SIZE, BLOCK_SIZE)),
+                                            color: Srgba::hex("A7DEFE")
+                                                .unwrap_or(Srgba::RED)
+                                                .into(),
+                                            ..Default::default()
+                                        },
+                                        transform: Transform::from_translation(Vec3::new(
+                                            i as f32 * BLOCK_SIZE - 140.,
+                                            j as f32 * BLOCK_SIZE - 140.,
+                                            0.,
+                                        )),
+                                        ..Default::default()
+                                    },
+                                ))
+                                .with_children(|p| {
+                                    p.spawn(PointLight2dBundle {
+                                        point_light: PointLight2d {
+                                            radius: 200.0,
+                                            intensity: 10.0,
+                                            falloff: 10.,
+                                            color: Srgba::hex("A7DEFE").unwrap().into(),
+                                            ..default()
+                                        },
+                                        ..default()
+                                    });
+                                });
+                            } else if val_block >= 0.2 {
                                 par.spawn((
                                     Name::new("Block"),
                                     RigidBody::Static,

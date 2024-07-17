@@ -4,6 +4,8 @@ use bevy::{
     app::{Plugin, Startup},
     prelude::*,
 };
+use bevy_kira_audio::prelude::*;
+use bevy_light_2d::light::AmbientLight2d;
 use chunk::ChunkPlugin;
 use player::PlayerPlugin;
 
@@ -23,7 +25,13 @@ impl Plugin for GamePlugin {
     }
 }
 
-fn setup(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
-    log::info!("loaded game plugin");
+fn setup(mut commands: Commands, audio: Res<Audio>, assets: Res<AssetServer>) {
+    commands.spawn((
+        Camera2dBundle::default(),
+        AmbientLight2d {
+            brightness: 0.1,
+            ..default()
+        },
+    ));
+    audio.play(assets.load("audio/bg.mp3")).looped();
 }
